@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MergeSort Visualization</title>
+    <link rel="stylesheet" href="btn.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        height: 300px;
+        margin-top: 20px;
+        position: relative;
+      }
+      .bar {
+        width: 20px;
+        margin: 2px;
+        background-color: steelblue;
+        transition: height 0.3s, background-color 0.3s;
+        position: relative;
+      }
+      .bar.active {
+        background-color: red;
+      }
+      .bar.merged {
+        background-color: orange;
+      }
+      .bar span {
+        position: absolute;
+        bottom: -20px;
+        left: 0;
+        width: 100%;
+        font-size: 12px;
+        text-align: center;
+      }
+      #pivotIndicator {
+        margin-top: 100px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>MergeSort Visualization</h1>
+    <div class="container" id="barContainer"></div>
+    <button class="btn" onclick="startSorting()">Sort</button>
+
+    <script>
+      let array = [
+        5, 81, 41, 62, 15, 15, 17, 94, 75, 30, 63, 99, 28, 16, 97, 8, 38, 89, 3, 72, 19, 66, 53, 33, 47, 17, 2, 82, 43, 61, 29, 47, 96,
+        56, 63, 61, 45, 92, 20, 6, 95, 63, 45, 54, 66, 36, 96, 35, 60, 99, 78, 25, 56, 42, 64, 93, 26, 56, 14, 43,
+      ];
+      const container = document.getElementById('barContainer');
+
+      function createBars() {
+        container.innerHTML = '';
+        array.forEach((value) => {
+          const bar = document.createElement('div');
+          bar.style.height = value * 2 + 'px';
+          bar.classList.add('bar');
+          const label = document.createElement('span');
+          label.innerText = value;
+          bar.appendChild(label);
+          container.appendChild(bar);
+        });
+      }
+
+      async function mergeSort(arr) {
+        if (arr.length <= 1) return arr;
+
+        const mid = Math.floor(arr.length / 2);
+        const left = arr.slice(0, mid);
+        const right = arr.slice(mid);
+
+        // Recursively split and sort
+        const sortedLeft = await mergeSort(left);
+        const sortedRight = await mergeSort(right);
+
+        // Merge the two sorted halves
+        return merge(sortedLeft, sortedRight);
+      }
+
+      async function merge(left, right) {
+        let result = [];
+        let leftIndex = 0;
+        let rightIndex = 0;
+
+        const bars = document.getElementsByClassName('bar');
+
+        while (leftIndex < left.length && rightIndex < right.length) {
+          // Highlight the elements being merged
+          bars[leftIndex].classList.add('active');
+          bars[rightIndex + left.length].classList.add('active');
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          if (left[leftIndex] < right[rightIndex]) {
+            result.push(left[leftIndex]);
+            leftIndex++;
+          } else {
+            result.push(right[rightIndex]);
+            rightIndex++;
+          }
+
+          // Remove the active class after comparing
+          bars[leftIndex].classList.remove('active');
+          bars[rightIndex + left.length].classList.remove('active');
+        }
+
+        // Merge the remaining elements
+        while (leftIndex < left.length) {
+          result.push(left[leftIndex]);
+          leftIndex++;
+        }
+
+        while (rightIndex < right.length) {
+          result.push(right[rightIndex]);
+          rightIndex++;
+        }
+
+        // Update the bars and visualize the merge process
+        let k = 0;
+        while (k < result.length) {
+          array[k] = result[k];
+          bars[k].style.height = result[k] + 'px';
+          bars[k].innerHTML = `<span>${result[k]}</span>`;
+          bars[k].classList.add('merged');
+          await new Promise((resolve) => setTimeout(resolve, 250));
+          bars[k].classList.remove('merged');
+          k++;
+        }
+
+        return result;
+      }
+
+      async function startSorting() {
+        await mergeSort(array);
+      }
+
+      createBars();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>QuickSort Visualization</title>
+        <link rel="stylesheet" href="btn.css">
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				text-align: center;
+			}
+			.container {
+				display: flex;
+				justify-content: center;
+				align-items: flex-end;
+				height: 300px;
+				margin-top: 20px;
+				position: relative;
+			}
+			.bar {
+				width: 20px;
+				margin: 2px;
+				background-color: steelblue;
+				transition: height 0.3s, background-color 0.3s;
+				position: relative;
+			}
+			.bar.active {
+				background-color: red;
+			}
+			.bar.pivot {
+				background-color: orange;
+			}
+			.bar.sorted {
+				background-color: green;
+			}
+			.bar span {
+				position: absolute;
+				bottom: -20px;
+                left: 0;
+				width: 100%;
+				font-size: 12px;
+				text-align: center;
+			}
+			#pivotIndicator {
+				margin-top: 100px;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>QuickSort Visualization</h1>
+		<div class="container" id="barContainer"></div>
+		<p id="pivotIndicator">Pivot: None</p>
+		<button class="btn" onclick="startSorting()">Sort</button>
+
+		<script>
+			let array = [5, 81, 41, 62, 15, 15, 17, 94, 75, 30, 63, 99, 28, 16, 97, 8, 38, 89, 3, 72, 19, 66, 53, 33, 47, 17, 2, 82, 43, 61, 29, 47, 96, 56, 63, 61, 45, 92, 20, 6, 95, 63, 45, 54, 66, 36, 96, 35, 60, 99, 78, 25, 56, 42, 64, 93, 26, 56, 14, 43];
+			const container = document.getElementById("barContainer");
+			const pivotIndicator = document.getElementById("pivotIndicator");
+
+			function createBars() {
+				container.innerHTML = "";
+				array.forEach((value) => {
+					const bar = document.createElement("div");
+					bar.style.height = value + "px";
+					bar.classList.add("bar");
+					const label = document.createElement("span");
+					label.innerText = value;
+					bar.appendChild(label);
+					container.appendChild(bar);
+				});
+			}
+
+			async function quickSort(arr, left = 0, right = arr.length - 1) {
+				if (left >= right) return;
+				let pivotIndex = await partition(arr, left, right);
+				document.getElementsByClassName("bar")[pivotIndex].classList.add("sorted"); // Marcare pivot ca sortat
+				await quickSort(arr, left, pivotIndex - 1);
+				await quickSort(arr, pivotIndex + 1, right);
+			}
+
+			async function partition(arr, left, right) {
+				let pivot = arr[right];
+				pivotIndicator.innerText = `Pivot: ${pivot}`;
+				let i = left;
+				const bars = document.getElementsByClassName("bar");
+				bars[right].classList.add("pivot");
+				for (let j = left; j < right; j++) {
+					bars[j].classList.add("active");
+					await new Promise((resolve) => setTimeout(resolve, 100));
+					if (arr[j] < pivot) {
+						[arr[i], arr[j]] = [arr[j], arr[i]];
+						i++;
+						updateBars();
+						await new Promise((resolve) => setTimeout(resolve, 100));
+					}
+					bars[j].classList.remove("active");
+				}
+				[arr[i], arr[right]] = [arr[right], arr[i]];
+				updateBars();
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				bars[right].classList.remove("pivot");
+				pivotIndicator.innerText = "Pivot: None";
+				return i;
+			}
+
+			function updateBars() {
+				const bars = document.getElementsByClassName("bar");
+				array.forEach((value, index) => {
+					bars[index].style.height = value * 2 + "px";
+					bars[index].innerHTML = `<span>${value}</span>`;
+				});
+			}
+
+			async function startSorting() {
+				await quickSort(array);
+			}
+
+			createBars();
+		</script>
+	</body>
+</html>
